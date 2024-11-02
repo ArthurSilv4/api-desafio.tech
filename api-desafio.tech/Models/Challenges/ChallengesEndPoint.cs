@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using api_desafio.tech.Data;
+using System.Data;
 
 namespace api_desafio.tech.Models.Challenges
 {
@@ -7,7 +8,7 @@ namespace api_desafio.tech.Models.Challenges
     {
         public static void AddChallengesEndpoints(this WebApplication app)
         {
-            var endpoint = app.MapGroup("challenges");
+            var endpoint = app.MapGroup("challenges").RequireAuthorization();
 
             endpoint.MapGet("/all", async (AppDbContext context, CancellationToken ct) =>
             {
@@ -34,7 +35,6 @@ namespace api_desafio.tech.Models.Challenges
                 await context.Challenges.AddAsync(newChallenge, ct);
                 await context.SaveChangesAsync(ct);
 
-
                 return Results.Ok(newChallenge);
             });
 
@@ -51,7 +51,6 @@ namespace api_desafio.tech.Models.Challenges
                 await context.SaveChangesAsync(ct);
                 return Results.Ok(challenge);
             });
-
 
             endpoint.MapDelete("{id:guid}", async (Guid id, AppDbContext context, CancellationToken ct) =>
             {
