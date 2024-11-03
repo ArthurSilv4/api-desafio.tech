@@ -4,6 +4,8 @@ using api_desafio.tech.Models.Challenges;
 using api_desafio.tech.Models.User;
 using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -53,6 +55,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddTransient<TokenService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -99,5 +102,21 @@ app.AddUserEndPoints();
 //{
 //    return service.Generate(new User(Id: 1, Email: "teste3@gmail.com", "123", Roles: new[] { "user" }));
 //});
+
+
+//ta logando
+
+app.MapPost("/login", async (string Email, string Password, AppDbContext context, TokenService tokenService, IPasswordHasher<User> passwordHasher) =>
+{
+    var user = await context.Users.FirstOrDefaultAsync(u => u.Email == Email);
+    if (user == null || passwordHasher.VerifyHashedPassword(user, user.Password, Password) == PasswordVerificationResult.Failed)
+    {
+        return Results.Unauthorized();
+    }
+
+    var token = tokenService.Generate(user);
+    return Results.Ok(new { Token = token });
+});
+
 
 app.Run();

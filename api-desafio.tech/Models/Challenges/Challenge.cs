@@ -10,6 +10,9 @@
         public List<DateTime> ChallengeDates { get; private set; }
         public bool Completed { get; private set; }
 
+        public int? UserId { get; private set; }
+        public User.User? User { get; private set; }
+
         public Challenge(string title, string description, DateTime startDate)
         {
             Id = Guid.NewGuid();
