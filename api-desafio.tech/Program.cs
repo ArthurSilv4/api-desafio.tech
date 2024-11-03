@@ -93,10 +93,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddChallengesEndpoints();
+app.AddUserEndPoints();
 
-app.MapGet("/auth", (TokenService service) =>
-{
-    return service.Generate(new User(Id: 1, Email: "teste3@gmail.com", "123", Roles: new[] { "user" }));
-});
+//app.MapGet("/auth", (TokenService service) =>
+//{
+//    return service.Generate(new User(Id: 1, Email: "teste3@gmail.com", "123", Roles: new[] { "user" }));
+//});
 
 app.Run();

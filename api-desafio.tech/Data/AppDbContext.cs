@@ -1,12 +1,14 @@
 ﻿using api_desafio.tech.Models.Challenges;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using api_desafio.tech.Models.User;
 
 namespace api_desafio.tech.Data
 {
     public class AppDbContext :DbContext 
     {
         public DbSet<Challenge> Challenges { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
