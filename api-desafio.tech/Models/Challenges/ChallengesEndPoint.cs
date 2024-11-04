@@ -36,7 +36,7 @@ namespace api_desafio.tech.Models.Challenges
                 return Results.Ok(challengeDtos);
             });
 
-            endpoint.MapGet("/Completed", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapGet("/completed", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
@@ -86,7 +86,7 @@ namespace api_desafio.tech.Models.Challenges
                 return Results.Ok(challengeDtos);
             });
 
-            endpoint.MapPost("", async (ClaimsPrincipal user, AddChallengeRequest request, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapPost("create", async (ClaimsPrincipal user, AddChallengeRequest request, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
@@ -104,7 +104,7 @@ namespace api_desafio.tech.Models.Challenges
                 return Results.Ok(newChallenge);
             });
 
-            endpoint.MapPut("{id:guid}", async (Guid id, UpdateChallengeRequest request, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateChallengeRequest request, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
@@ -143,7 +143,7 @@ namespace api_desafio.tech.Models.Challenges
             });
 
 
-            endpoint.MapDelete("{id:guid}", async (Guid id, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapDelete("delete/{id:guid}", async (Guid id, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
