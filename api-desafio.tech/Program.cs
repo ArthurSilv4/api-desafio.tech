@@ -1,11 +1,11 @@
 using api_desafio.tech;
 using api_desafio.tech.Data;
+using api_desafio.tech.Models.Auth;
 using api_desafio.tech.Models.Challenges;
 using api_desafio.tech.Models.User;
 using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -95,28 +95,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.AuthEndPoints();
 app.AddChallengesEndpoints();
 app.AddUserEndPoints();
-
-//app.MapGet("/auth", (TokenService service) =>
-//{
-//    return service.Generate(new User(Id: 1, Email: "teste3@gmail.com", "123", Roles: new[] { "user" }));
-//});
-
-
-//ta logando
-
-app.MapPost("/login", async (string Email, string Password, AppDbContext context, TokenService tokenService, IPasswordHasher<User> passwordHasher) =>
-{
-    var user = await context.Users.FirstOrDefaultAsync(u => u.Email == Email);
-    if (user == null || passwordHasher.VerifyHashedPassword(user, user.Password, Password) == PasswordVerificationResult.Failed)
-    {
-        return Results.Unauthorized();
-    }
-
-    var token = tokenService.Generate(user);
-    return Results.Ok(new { Token = token });
-});
-
 
 app.Run();
