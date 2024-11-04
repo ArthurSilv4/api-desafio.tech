@@ -10,7 +10,7 @@
         public List<DateTime> ChallengeDates { get; private set; }
         public bool Completed { get; private set; }
 
-        public int? UserId { get; private set; }
+        public Guid? UserId { get; private set; }
         public User.User? User { get; private set; }
 
         public Challenge(string title, string description, DateTime startDate)
@@ -32,6 +32,11 @@
             EndDate = startDate.Date.AddDays(4);
             ChallengeDates = Enumerable.Range(0, 5).Select(offset => startDate.Date.AddDays(offset)).ToList();
             Completed = completed;
+        }
+
+        public void SetUserId(Guid userId)
+        {
+            UserId = userId;
         }
     }
 }

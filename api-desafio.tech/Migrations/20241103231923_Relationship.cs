@@ -11,27 +11,21 @@ namespace api_desafio.tech.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "UserId",
-                table: "Challenges",
-                type: "int",
-                nullable: true);
-
             migrationBuilder.AddColumn<Guid>(
-                name: "UserId1",
+                name: "UserId",
                 table: "Challenges",
                 type: "uniqueidentifier",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Challenges_UserId1",
+                name: "IX_Challenges_UserId",
                 table: "Challenges",
-                column: "UserId1");
+                column: "UserId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Challenges_Users_UserId1",
+                name: "FK_Challenges_Users_UserId",
                 table: "Challenges",
-                column: "UserId1",
+                column: "UserId",
                 principalTable: "Users",
                 principalColumn: "Id");
         }
@@ -40,19 +34,15 @@ namespace api_desafio.tech.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Challenges_Users_UserId1",
+                name: "FK_Challenges_Users_UserId",
                 table: "Challenges");
 
             migrationBuilder.DropIndex(
-                name: "IX_Challenges_UserId1",
+                name: "IX_Challenges_UserId",
                 table: "Challenges");
 
             migrationBuilder.DropColumn(
                 name: "UserId",
-                table: "Challenges");
-
-            migrationBuilder.DropColumn(
-                name: "UserId1",
                 table: "Challenges");
         }
     }

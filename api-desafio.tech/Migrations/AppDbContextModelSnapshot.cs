@@ -47,15 +47,12 @@ namespace api_desafio.tech.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("UserId1")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Challenges");
                 });
@@ -90,7 +87,7 @@ namespace api_desafio.tech.Migrations
                 {
                     b.HasOne("api_desafio.tech.Models.User.User", "User")
                         .WithMany("Challenges")
-                        .HasForeignKey("UserId1");
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
