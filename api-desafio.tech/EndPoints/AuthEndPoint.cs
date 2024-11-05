@@ -14,9 +14,9 @@ namespace api_desafio.tech.EndPoints
         {
             var endpoint = app.MapGroup("auth");
 
-            endpoint.MapPost("/login", async (LoginRequest request, AppDbContext context, TokenService tokenService, IPasswordHasher<User> passwordHasher) =>
+            endpoint.MapPost("/login", async (LoginRequest request, AppDbContext context, TokenService tokenService, IPasswordHasher<User> passwordHasher, CancellationToken ct) =>
             {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
                 if (user == null || passwordHasher.VerifyHashedPassword(user, user.Password, request.Password) == PasswordVerificationResult.Failed)
                 {
                     return Results.Unauthorized();
