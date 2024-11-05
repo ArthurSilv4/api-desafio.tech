@@ -104,7 +104,18 @@ namespace api_desafio.tech.EndPoints
                 await context.Challenges.AddAsync(newChallenge, ct);
                 await context.SaveChangesAsync(ct);
 
-                return Results.Ok(newChallenge);
+                var challengeDto = new ChallengeDto(
+                    newChallenge.Id,
+                    newChallenge.Title,
+                    newChallenge.Description,
+                    newChallenge.StartDate,
+                    newChallenge.EndDate,
+                    newChallenge.ChallengeDates,
+                    newChallenge.Completed,
+                    newChallenge.UserId
+                );
+
+                return Results.Ok(challengeDto);
             });
 
             endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateChallengeRequest request, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
