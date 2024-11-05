@@ -1,8 +1,7 @@
 using api_desafio.tech;
 using api_desafio.tech.Data;
-using api_desafio.tech.Models.Auth;
-using api_desafio.tech.Models.Challenges;
-using api_desafio.tech.Models.User;
+using api_desafio.tech.EndPoints;
+using api_desafio.tech.Models;
 using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

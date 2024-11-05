@@ -2,8 +2,11 @@
 using api_desafio.tech.Data;
 using System.Data;
 using System.Security.Claims;
+using api_desafio.tech.DTOs;
+using api_desafio.tech.Requests;
+using api_desafio.tech.Models;
 
-namespace api_desafio.tech.Models.Challenges
+namespace api_desafio.tech.EndPoints
 {
     public static class ChallengesEndPoint
     {

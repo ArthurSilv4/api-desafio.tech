@@ -1,4 +1,4 @@
-﻿namespace api_desafio.tech.Models.Challenges
+﻿namespace api_desafio.tech.Models
 {
     public class Challenge
     {
@@ -11,7 +11,7 @@
         public bool Completed { get; private set; }
 
         public Guid? UserId { get; private set; }
-        public User.User? User { get; private set; }
+        public User? User { get; private set; }
 
         public Challenge(string title, string description, DateTime startDate)
         {

@@ -1,4 +1,4 @@
-﻿using api_desafio.tech.Models.User;
+﻿using api_desafio.tech.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

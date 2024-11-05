@@ -1,6 +1,4 @@
-﻿using api_desafio.tech.Models.Challenges;
-
-namespace api_desafio.tech.Models.User
+﻿namespace api_desafio.tech.Models
 {
     public class User
     {

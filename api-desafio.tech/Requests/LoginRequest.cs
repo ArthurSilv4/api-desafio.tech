@@ -1,4 +1,4 @@
-﻿namespace api_desafio.tech.Models.Auth
+﻿namespace api_desafio.tech.Requests
 {
     public record LoginRequest(string Email, string Password);
 }

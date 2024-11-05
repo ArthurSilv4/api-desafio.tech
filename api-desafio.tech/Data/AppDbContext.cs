@@ -1,7 +1,6 @@
-﻿using api_desafio.tech.Models.Challenges;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
-using api_desafio.tech.Models.User;
+using api_desafio.tech.Models;
 
 namespace api_desafio.tech.Data
 {

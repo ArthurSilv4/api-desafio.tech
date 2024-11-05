@@ -1,4 +1,4 @@
-﻿namespace api_desafio.tech.Models.User
+﻿namespace api_desafio.tech.DTOs
 {
     public record UserDto(Guid Id, string Email, string[] Roles);
 }

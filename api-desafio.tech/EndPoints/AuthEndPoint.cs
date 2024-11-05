@@ -2,9 +2,11 @@
 using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using api_desafio.tech.Models.User;
+using api_desafio.tech.Requests;
+using api_desafio.tech.Models;
+using api_desafio.tech.DTOs;
 
-namespace api_desafio.tech.Models.Auth
+namespace api_desafio.tech.EndPoints
 {
     public static class AuthEndPoint
     {
@@ -12,7 +14,7 @@ namespace api_desafio.tech.Models.Auth
         {
             var endpoint = app.MapGroup("auth");
 
-            endpoint.MapPost("/login", async (LoginRequest request, AppDbContext context, TokenService tokenService, IPasswordHasher<User.User> passwordHasher) =>
+            endpoint.MapPost("/login", async (LoginRequest request, AppDbContext context, TokenService tokenService, IPasswordHasher<User> passwordHasher) =>
             {
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
                 if (user == null || passwordHasher.VerifyHashedPassword(user, user.Password, request.Password) == PasswordVerificationResult.Failed)
@@ -33,8 +35,8 @@ namespace api_desafio.tech.Models.Auth
                     return Results.Conflict("Ja existe!");
                 }
 
-                var passwordHasher = new PasswordHasher<User.User>();
-                var newUser = new User.User(request.Email, request.Password, request.Roles);
+                var passwordHasher = new PasswordHasher<User>();
+                var newUser = new User(request.Email, request.Password, request.Roles);
                 var hashedPassword = passwordHasher.HashPassword(newUser, request.Password);
                 newUser.SetHashedPassword(hashedPassword);
 

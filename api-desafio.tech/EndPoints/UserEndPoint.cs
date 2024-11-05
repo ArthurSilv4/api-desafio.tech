@@ -1,6 +1,6 @@
 ﻿using api_desafio.tech.Data;
 
-namespace api_desafio.tech.Models.User
+namespace api_desafio.tech.EndPoints
 {
     public static class UserEndPoint
     {
