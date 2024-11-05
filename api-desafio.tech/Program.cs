@@ -55,6 +55,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddTransient<TokenService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 
 builder.Services.AddAuthorization(options =>
 {

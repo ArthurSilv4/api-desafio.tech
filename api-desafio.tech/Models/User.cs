@@ -9,6 +9,8 @@
         public bool Active { get; private set; }
 
         public ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
+        public ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
+
 
         public User(string email, string password, string[] roles)
         {
@@ -27,6 +29,11 @@
         public void DisabeUser()
         {
             Active = false;
+        }
+
+        public void ActiveUser()
+        {
+            Active = true;
         }
     }
 }

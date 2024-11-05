@@ -8,6 +8,8 @@ namespace api_desafio.tech.Data
     {
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<VerificationCode> VerificationCodes { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

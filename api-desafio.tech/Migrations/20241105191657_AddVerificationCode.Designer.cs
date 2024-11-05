@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using api_desafio.tech.Data;
 
@@ -11,9 +12,11 @@ using api_desafio.tech.Data;
 namespace api_desafio.tech.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241105191657_AddVerificationCode")]
+    partial class AddVerificationCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,12 +99,10 @@ namespace api_desafio.tech.Migrations
                     b.Property<DateTime>("Expiration")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("VerificationCodes");
                 });
@@ -115,20 +116,9 @@ namespace api_desafio.tech.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("api_desafio.tech.Models.VerificationCode", b =>
-                {
-                    b.HasOne("api_desafio.tech.Models.User", "User")
-                        .WithMany("VerificationCodes")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("api_desafio.tech.Models.User", b =>
                 {
                     b.Navigation("Challenges");
-
-                    b.Navigation("VerificationCodes");
                 });
 #pragma warning restore 612, 618
         }
