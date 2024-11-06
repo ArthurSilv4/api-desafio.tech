@@ -6,6 +6,7 @@ using api_desafio.tech.Requests;
 using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace api_desafio.tech.EndPoints
 {
@@ -15,23 +16,35 @@ namespace api_desafio.tech.EndPoints
         {
             var endpoint = app.MapGroup("users").RequireAuthorization();
 
-            endpoint.MapGet("/{id:guid}", async (Guid id, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapGet("/", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
-                var user = await context.Users.FindAsync(id, ct);
-                if (user == null)
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
                 {
                     return Results.NotFound();
                 }
 
-                var userDto = new UserDto(user.Id, user.Email, user.Roles);
+                var userEntity = await context.Users.FindAsync(new Guid(userIdClaim), ct);
+                if (userEntity == null)
+                {
+                    return Results.NotFound();
+                }
+
+                var userDto = new UserDto(userEntity.Id, userEntity.Email, userEntity.Roles);
 
                 return Results.Ok(userDto);
             });
 
-            endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateUserRequest request, AppDbContext context, IPasswordHasher<User> passwordHasher, IEmailService emailService, CancellationToken ct) =>
+            endpoint.MapPut("edit", async (ClaimsPrincipal user, UpdateUserRequest request, AppDbContext context, IPasswordHasher<User> passwordHasher, IEmailService emailService, CancellationToken ct) =>
             {
-                var user = await context.Users.FindAsync(id, ct);
-                if (user == null)
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
+                {
+                    return Results.NotFound();
+                }
+
+                var userEntity = await context.Users.FindAsync(new Guid(userIdClaim), ct);
+                if (userEntity == null)
                 {
                     return Results.NotFound();
                 }
@@ -49,7 +62,7 @@ namespace api_desafio.tech.EndPoints
                         return Results.BadRequest("Email já está em uso.");
                     }
 
-                    await VerificationCodeHelper.SendVerificationCodeAsync(user, context, emailService, ct);
+                    await VerificationCodeHelper.SendVerificationCodeAsync(userEntity, context, emailService, ct);
 
                     return Results.Ok("Código de confirmação enviado para o novo e-mail.");
                 }
@@ -66,24 +79,30 @@ namespace api_desafio.tech.EndPoints
                         return Results.BadRequest("Senha atual é obrigatória.");
                     }
 
-                    var passwordVerificationResult = passwordHasher.VerifyHashedPassword(user, user.Password, request.CurrentPassword);
+                    var passwordVerificationResult = passwordHasher.VerifyHashedPassword(userEntity, userEntity.Password, request.CurrentPassword);
                     if (passwordVerificationResult != PasswordVerificationResult.Success)
                     {
                         return Results.BadRequest("Senha atual incorreta.");
                     }
 
-                    var hashedPassword = passwordHasher.HashPassword(user, request.NewPassword);
-                    user.UpdatePassword(hashedPassword);
+                    var hashedPassword = passwordHasher.HashPassword(userEntity, request.NewPassword);
+                    userEntity.UpdatePassword(hashedPassword);
                 }
 
                 await context.SaveChangesAsync(ct);
                 return Results.Ok();
             });
 
-            endpoint.MapPut("edit/{id:guid}/confirm", async (Guid id, ConfirmEmailRequest request, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapPut("edit/confirm", async (ClaimsPrincipal user, ConfirmEmailRequest request, AppDbContext context, CancellationToken ct) =>
             {
-                var user = await context.Users.FindAsync(id, ct);
-                if (user == null)
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
+                {
+                    return Results.NotFound();
+                }
+
+                var userEntity = await context.Users.FindAsync(new Guid(userIdClaim), ct);
+                if (userEntity == null)
                 {
                     return Results.NotFound();
                 }
@@ -93,7 +112,7 @@ namespace api_desafio.tech.EndPoints
                     return Results.BadRequest("Código de confirmação é obrigatório.");
                 }
 
-                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == user.Id && vc.Code == request.ConfirmationCode, ct);
+                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == userEntity.Id && vc.Code == request.ConfirmationCode, ct);
                 if (verificationCode == null || verificationCode.Expiration < DateTime.UtcNow)
                 {
                     return Results.BadRequest("Código de confirmação inválido ou expirado.");
@@ -101,22 +120,28 @@ namespace api_desafio.tech.EndPoints
 
                 if (!string.IsNullOrEmpty(request.Email))
                 {
-                    user.UpdateEmail(request.Email);
+                    userEntity.UpdateEmail(request.Email);
                 }
 
                 await context.SaveChangesAsync(ct);
                 return Results.Ok("E-mail atualizado com sucesso.");
             });
 
-            endpoint.MapDelete("delete/{id:guid}", async (Guid id, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapDelete("delete", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
-                var user = await context.Users.FindAsync(id, ct);
-                if (user == null)
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userIdClaim == null)
                 {
                     return Results.NotFound();
                 }
 
-                user.DisabeUser();
+                var userEntity = await context.Users.FindAsync(new Guid(userIdClaim), ct);
+                if (userEntity == null)
+                {
+                    return Results.NotFound();
+                }
+
+                userEntity.DisabeUser();
 
                 await context.SaveChangesAsync(ct);
                 return Results.Ok();
