@@ -21,6 +21,16 @@
             Active = true;
         }
 
+        public void UpdateEmail(string email)
+        {
+            Email = email;
+        }
+
+        public void UpdatePassword(string password)
+        {
+            Password = password;
+        }
+
         public void SetHashedPassword(string hashedPassword)
         {
             Password = hashedPassword;
