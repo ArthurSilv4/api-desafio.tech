@@ -3,7 +3,9 @@ using api_desafio.tech.DTOs;
 using api_desafio.tech.Helpers;
 using api_desafio.tech.Models;
 using api_desafio.tech.Requests;
+using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace api_desafio.tech.EndPoints
 {
@@ -26,7 +28,7 @@ namespace api_desafio.tech.EndPoints
                 return Results.Ok(userDto);
             });
 
-            endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateUserRequest request, AppDbContext context, IPasswordHasher<User> passwordHasher, CancellationToken ct) =>
+            endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateUserRequest request, AppDbContext context, IPasswordHasher<User> passwordHasher, IEmailService emailService, CancellationToken ct) =>
             {
                 var user = await context.Users.FindAsync(id, ct);
                 if (user == null)
@@ -40,7 +42,23 @@ namespace api_desafio.tech.EndPoints
                     {
                         return Results.BadRequest("Email inválido.");
                     }
-                    user.UpdateEmail(request.Email);
+
+                    var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
+                    if (existingUser != null)
+                    {
+                        return Results.BadRequest("Email já está em uso.");
+                    }
+
+                    var confirmationCode = CodeGenerator.GenerateVerificationCode();
+                    var verificationCodeEntity = new VerificationCode(confirmationCode);
+                    verificationCodeEntity.SetUserId(user.Id);
+
+                    await context.VerificationCodes.AddAsync(verificationCodeEntity, ct);
+                    await context.SaveChangesAsync(ct);
+
+                    await emailService.SendEmailAsync(request.Email, "Código de Verificação", $"Seu código de verificação é: {confirmationCode}");
+
+                    return Results.Ok("Código de confirmação enviado para o novo e-mail.");
                 }
 
                 if (!string.IsNullOrEmpty(request.NewPassword))
@@ -67,6 +85,34 @@ namespace api_desafio.tech.EndPoints
 
                 await context.SaveChangesAsync(ct);
                 return Results.Ok();
+            });
+
+            endpoint.MapPut("edit/{id:guid}/confirm", async (Guid id, ConfirmEmailRequest request, AppDbContext context, CancellationToken ct) =>
+            {
+                var user = await context.Users.FindAsync(id, ct);
+                if (user == null)
+                {
+                    return Results.NotFound();
+                }
+
+                if (string.IsNullOrEmpty(request.ConfirmationCode))
+                {
+                    return Results.BadRequest("Código de confirmação é obrigatório.");
+                }
+
+                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == user.Id && vc.Code == request.ConfirmationCode, ct);
+                if (verificationCode == null || verificationCode.Expiration < DateTime.UtcNow)
+                {
+                    return Results.BadRequest("Código de confirmação inválido ou expirado.");
+                }
+
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    user.UpdateEmail(request.Email);
+                }
+
+                await context.SaveChangesAsync(ct);
+                return Results.Ok("E-mail atualizado com sucesso.");
             });
 
             endpoint.MapDelete("delete/{id:guid}", async (Guid id, AppDbContext context, CancellationToken ct) =>
