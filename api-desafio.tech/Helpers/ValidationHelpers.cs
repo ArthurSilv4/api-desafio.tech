@@ -17,7 +17,7 @@
 
         public static bool IsValidPassword(string password)
         {
-            if (password.Length < 8)
+            if (password.Length < 6)
                 return false;
 
             if (!password.Any(char.IsUpper))
