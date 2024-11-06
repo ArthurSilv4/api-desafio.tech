@@ -16,7 +16,7 @@ namespace api_desafio.tech.EndPoints
         public static void AuthEndPoints(this WebApplication app)
         {
             var endpoint = app.MapGroup("auth");
-            
+
             endpoint.MapPost("/login", async (LoginRequest request, AppDbContext context, TokenService tokenService, IPasswordHasher<User> passwordHasher, CancellationToken ct) =>
             {
                 var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
@@ -26,7 +26,7 @@ namespace api_desafio.tech.EndPoints
                 }
 
                 var token = tokenService.Generate(user);
-                return Results.Ok(new { Token = token });
+                return Results.Ok(new { Token = token, User = user.Email });
             });
 
             endpoint.MapPost("/register", async (RegisterRequest request, AppDbContext context, IEmailService emailService, CancellationToken ct) =>
