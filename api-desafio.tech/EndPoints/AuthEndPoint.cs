@@ -49,7 +49,8 @@ namespace api_desafio.tech.EndPoints
                 }
 
                 var passwordHasher = new PasswordHasher<User>();
-                var newUser = new User(request.Email, request.Password, request.Roles);
+                var roles = request.Email == "admin@example.com" ? new string[] { "admin" } : new string[] { "user" }; //Precisa mudar isso para deixar mais seguro
+                var newUser = new User(request.Email, request.Password, roles);
                 var hashedPassword = passwordHasher.HashPassword(newUser, request.Password);
                 newUser.SetHashedPassword(hashedPassword);
                 newUser.DisabeUser();
