@@ -49,14 +49,7 @@ namespace api_desafio.tech.EndPoints
                         return Results.BadRequest("Email já está em uso.");
                     }
 
-                    var confirmationCode = CodeGenerator.GenerateVerificationCode();
-                    var verificationCodeEntity = new VerificationCode(confirmationCode);
-                    verificationCodeEntity.SetUserId(user.Id);
-
-                    await context.VerificationCodes.AddAsync(verificationCodeEntity, ct);
-                    await context.SaveChangesAsync(ct);
-
-                    await emailService.SendEmailAsync(request.Email, "Código de Verificação", $"Seu código de verificação é: {confirmationCode}");
+                    await VerificationCodeHelper.SendVerificationCodeAsync(user, context, emailService, ct);
 
                     return Results.Ok("Código de confirmação enviado para o novo e-mail.");
                 }

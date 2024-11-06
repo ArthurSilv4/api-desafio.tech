@@ -58,14 +58,7 @@ namespace api_desafio.tech.EndPoints
                 await context.Users.AddAsync(newUser, ct);
                 await context.SaveChangesAsync(ct);
 
-                var verificationCode = CodeGenerator.GenerateVerificationCode();
-                var verificationCodeEntity = new VerificationCode(verificationCode);
-                verificationCodeEntity.SetUserId(newUser.Id);
-
-                await context.VerificationCodes.AddAsync(verificationCodeEntity, ct);
-                await context.SaveChangesAsync(ct);
-
-                await emailService.SendEmailAsync(newUser.Email, "Código de Verificação", $"Seu código de verificação é: {verificationCode}");
+                await VerificationCodeHelper.SendVerificationCodeAsync(newUser, context, emailService, ct);
 
                 var userReturn = new UserDto(newUser.Id, newUser.Email, newUser.Roles);
                 return Results.Ok(userReturn);
@@ -103,14 +96,7 @@ namespace api_desafio.tech.EndPoints
                     return Results.BadRequest("Usuário já está ativo.");
                 }
 
-                var verificationCode = CodeGenerator.GenerateVerificationCode();
-                var verificationCodeEntity = new VerificationCode(verificationCode);
-                verificationCodeEntity.SetUserId(user.Id);
-
-                await context.VerificationCodes.AddAsync(verificationCodeEntity, ct);
-                await context.SaveChangesAsync(ct);
-
-                await emailService.SendEmailAsync(user.Email, "Código de Verificação", $"Seu novo código de verificação é: {verificationCode}");
+                await VerificationCodeHelper.SendVerificationCodeAsync(user, context, emailService, ct);
 
                 return Results.Ok("Novo código de verificação enviado com sucesso.");
             });
