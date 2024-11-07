@@ -26,7 +26,7 @@ namespace api_desafio.tech.EndPoints
                 }
 
                 var token = tokenService.Generate(user);
-                return Results.Ok(new { Token = token, User = user.Email });
+                return Results.Ok(token);
             });
 
             endpoint.MapPost("/register", async (RegisterRequest request, AppDbContext context, IEmailService emailService, CancellationToken ct) =>
