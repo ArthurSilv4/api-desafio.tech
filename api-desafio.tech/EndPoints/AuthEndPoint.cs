@@ -66,19 +66,21 @@ namespace api_desafio.tech.EndPoints
 
             endpoint.MapPost("/verify", async (VerifyRequest request, AppDbContext context, CancellationToken ct) =>
             {
-                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == request.UserId && vc.Code == request.Code, ct);
+                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
+                if (user == null)
+                {
+                    return Results.BadRequest("Usuário não encontrado.");
+                }
+
+                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == user.Id && vc.Code == request.Code, ct);
 
                 if (verificationCode == null || verificationCode.Expiration < DateTime.UtcNow)
                 {
                     return Results.BadRequest("Código de verificação inválido ou expirado.");
                 }
 
-                var user = await context.Users.FindAsync(request.UserId);
-                if (user != null)
-                {
-                    user.ActiveUser();
-                    await context.SaveChangesAsync(ct);
-                }
+                user.ActiveUser();
+                await context.SaveChangesAsync(ct);
 
                 return Results.Ok("Verificação bem-sucedida.");
             });

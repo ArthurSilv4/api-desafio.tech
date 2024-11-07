@@ -1,5 +1,5 @@
 ﻿namespace api_desafio.tech.Requests
 {
-    public record RegisterRequest(string Email, string Password, string[] Roles);
+    public record RegisterRequest(string Email, string Password);
 
 }
