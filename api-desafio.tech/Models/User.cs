@@ -36,6 +36,11 @@
             Email = email;
         }
 
+        public void SetHashedPassword(string hashedPassword)
+        {
+            Password = hashedPassword;
+        }
+
         public void Disable()
         {
             Active = false;
