@@ -31,6 +31,7 @@ namespace api_desafio.tech.Services
         {
             var ci = new ClaimsIdentity();
             ci.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+            ci.AddClaim(new Claim(ClaimTypes.Name, user.Name));
             ci.AddClaim(new Claim(ClaimTypes.Email, user.Email));
             foreach (var role in user.Roles)
             {

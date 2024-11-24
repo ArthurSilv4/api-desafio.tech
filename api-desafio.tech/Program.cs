@@ -52,6 +52,13 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "SampleInstance";
+});
+
 builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddTransient<TokenService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

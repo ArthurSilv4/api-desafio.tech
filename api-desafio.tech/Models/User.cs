@@ -3,21 +3,31 @@
     public class User
     {
         public Guid Id { get; init; }
+        public string Name { get; private set; }
+        public string? Description { get; private set; }
         public string Email { get; private set; }
         public string Password { get; private set; }
         public string[] Roles { get; private set; }
         public bool Active { get; private set; }
 
+
+        public int Xp { get; private set; }
+        public int Level { get; private set; }
+        public string[]? SocialMedia { get; private set; }
+
         public ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
-        public ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
 
-
-        public User(string email, string password, string[] roles)
+        public User(string name, string email, string password, string[] roles)
         {
             Id = new Guid();
+            Name = name;
+            Description = null;
             Email = email;
             Password = password;
             Roles = roles;
+            Xp = 0;
+            Level = 0;
+            SocialMedia = null;
             Active = true;
         }
 
@@ -26,17 +36,7 @@
             Email = email;
         }
 
-        public void UpdatePassword(string password)
-        {
-            Password = password;
-        }
-
-        public void SetHashedPassword(string hashedPassword)
-        {
-            Password = hashedPassword;
-        }
-
-        public void DisabeUser()
+        public void Disable()
         {
             Active = false;
         }

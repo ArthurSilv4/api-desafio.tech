@@ -6,6 +6,7 @@ using api_desafio.tech.Requests;
 using api_desafio.tech.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using System.Security.Claims;
 
 namespace api_desafio.tech.EndPoints
@@ -30,12 +31,12 @@ namespace api_desafio.tech.EndPoints
                     return Results.NotFound();
                 }
 
-                var userDto = new UserDto(userEntity.Id, userEntity.Email, userEntity.Roles);
+                var userDto = new UserDto(userEntity.Id, userEntity.Name, userEntity.Description, userEntity.Email, userEntity.Roles, userEntity.Xp, userEntity.Level, userEntity.SocialMedia);
 
                 return Results.Ok(userDto);
             });
 
-            endpoint.MapPut("edit", async (ClaimsPrincipal user, UpdateUserRequest request, AppDbContext context, IPasswordHasher<User> passwordHasher, IEmailService emailService, CancellationToken ct) =>
+            endpoint.MapPut("edit/email", async (ClaimsPrincipal user, UpdateUserRequest request, AppDbContext context, IDistributedCache cache, IEmailService emailService, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userIdClaim == null)
@@ -49,51 +50,28 @@ namespace api_desafio.tech.EndPoints
                     return Results.NotFound();
                 }
 
-                if (!string.IsNullOrEmpty(request.Email))
+                if (string.IsNullOrEmpty(request.Email))
                 {
-                    if (!ValidationHelpers.IsValidEmail(request.Email))
-                    {
-                        return Results.BadRequest("Email inválido.");
-                    }
-
-                    var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
-                    if (existingUser != null)
-                    {
-                        return Results.BadRequest("Email já está em uso.");
-                    }
-
-                    await VerificationCodeHelper.SendVerificationCodeAsync(userEntity, context, emailService, ct);
-
-                    return Results.Ok("Código de confirmação enviado para o novo e-mail.");
+                    return Results.BadRequest("Novo e-mail é obrigatório.");
                 }
 
-                if (!string.IsNullOrEmpty(request.NewPassword))
+                if (!ValidationHelpers.IsValidEmail(request.Email))
                 {
-                    if (!ValidationHelpers.IsValidPassword(request.NewPassword))
-                    {
-                        return Results.BadRequest("Senha inválida.");
-                    }
-
-                    if (string.IsNullOrEmpty(request.CurrentPassword))
-                    {
-                        return Results.BadRequest("Senha atual é obrigatória.");
-                    }
-
-                    var passwordVerificationResult = passwordHasher.VerifyHashedPassword(userEntity, userEntity.Password, request.CurrentPassword);
-                    if (passwordVerificationResult != PasswordVerificationResult.Success)
-                    {
-                        return Results.BadRequest("Senha atual incorreta.");
-                    }
-
-                    var hashedPassword = passwordHasher.HashPassword(userEntity, request.NewPassword);
-                    userEntity.UpdatePassword(hashedPassword);
+                    return Results.BadRequest("E-mail inválido.");
                 }
 
-                await context.SaveChangesAsync(ct);
-                return Results.Ok();
+                var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
+                if (existingUser != null)
+                {
+                    return Results.BadRequest("E-mail já está em uso.");
+                }
+
+                await VerificationCodeHelper.SendVerificationCodeAsync(userEntity, request.Email, emailService, cache, ct);
+
+                return Results.Ok("Código de confirmação enviado para o novo e-mail.");
             });
 
-            endpoint.MapPut("edit/confirm", async (ClaimsPrincipal user, ConfirmEmailRequest request, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapPut("edit/email/confirm", async (ClaimsPrincipal user, ConfirmEmailRequest request, AppDbContext context, IDistributedCache cache, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userIdClaim == null)
@@ -112,22 +90,31 @@ namespace api_desafio.tech.EndPoints
                     return Results.BadRequest("Código de confirmação é obrigatório.");
                 }
 
-                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == userEntity.Id && vc.Code == request.ConfirmationCode, ct);
-                if (verificationCode == null || verificationCode.Expiration < DateTime.UtcNow)
+                var cachedCode = await cache.GetStringAsync($"{request.Email}_verificationCode", ct);
+                if (cachedCode == null || cachedCode != request.ConfirmationCode)
                 {
                     return Results.BadRequest("Código de confirmação inválido ou expirado.");
                 }
 
-                if (!string.IsNullOrEmpty(request.Email))
+                if (string.IsNullOrEmpty(request.Email))
                 {
-                    userEntity.UpdateEmail(request.Email);
+                    return Results.BadRequest("E-mail é obrigatório.");
                 }
 
+                userEntity.UpdateEmail(request.Email);
+                
                 await context.SaveChangesAsync(ct);
+
+                await cache.RemoveAsync(request.Email, ct);
+                await cache.RemoveAsync($"{request.Email}_verificationCode", ct);
+                await cache.RemoveAsync($"{request.Email}_name", ct);
+                await cache.RemoveAsync($"{request.Email}_email", ct);
+                await cache.RemoveAsync($"{request.Email}_hashedPassword", ct);
+
                 return Results.Ok("E-mail atualizado com sucesso.");
             });
 
-            endpoint.MapDelete("delete", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapDelete("disable", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userIdClaim == null)
@@ -141,7 +128,7 @@ namespace api_desafio.tech.EndPoints
                     return Results.NotFound();
                 }
 
-                userEntity.DisabeUser();
+                userEntity.Disable();
 
                 await context.SaveChangesAsync(ct);
                 return Results.Ok();

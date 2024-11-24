@@ -7,6 +7,8 @@ using api_desafio.tech.Models;
 using api_desafio.tech.DTOs;
 using api_desafio.tech.Helpers;
 using System.Reflection;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 
 namespace api_desafio.tech.EndPoints
@@ -29,7 +31,7 @@ namespace api_desafio.tech.EndPoints
                 return Results.Ok(token);
             });
 
-            endpoint.MapPost("/register", async (RegisterRequest request, AppDbContext context, IEmailService emailService, CancellationToken ct) =>
+            endpoint.MapPost("/register", async (RegisterRequest request, IDistributedCache cache, IEmailService emailService, CancellationToken ct) =>
             {
                 if (!ValidationHelpers.IsValidEmail(request.Email))
                 {
@@ -41,66 +43,53 @@ namespace api_desafio.tech.EndPoints
                     return Results.BadRequest("A senha deve ter no mínimo 8 caracteres, incluindo pelo menos uma letra maiúscula e um caractere especial.");
                 }
 
-                var userExists = await context.Users.AnyAsync(user => user.Email == request.Email, ct);
-
-                if (userExists)
+                var userExists = await cache.GetStringAsync(request.Email, ct);
+                if (userExists != null)
                 {
-                    return Results.Conflict("Já existe!");
+                    return Results.Conflict("Já existe um usuário com este e-mail.");
                 }
 
                 var passwordHasher = new PasswordHasher<User>();
-                var roles = request.Email == "admin@example.com" ? new string[] { "admin" } : new string[] { "user" }; //Precisa mudar isso para deixar mais seguro
-                var newUser = new User(request.Email, request.Password, roles);
+                var roles = request.Email == "admin@example.com" ? new string[] { "admin" } : new string[] { "user" };
+                var newUser = new User(request.Name, request.Email, request.Password, roles);
                 var hashedPassword = passwordHasher.HashPassword(newUser, request.Password);
                 newUser.SetHashedPassword(hashedPassword);
-                newUser.DisabeUser();
 
-                await context.Users.AddAsync(newUser, ct);
-                await context.SaveChangesAsync(ct);
+                await VerificationCodeHelper.SendVerificationCodeAsync(newUser, newUser.Email, emailService, cache, ct);
 
-                await VerificationCodeHelper.SendVerificationCodeAsync(newUser, context, emailService, ct);
-
-                var userReturn = new UserDto(newUser.Id, newUser.Email, newUser.Roles);
-                return Results.Ok(userReturn);
+                return Results.Ok("Usuário registrado. Verifique seu e-mail para ativar a conta.");
             });
 
-            endpoint.MapPost("/verify", async (VerifyRequest request, AppDbContext context, CancellationToken ct) =>
+
+            endpoint.MapPost("/verify", async (VerifyRequest request, AppDbContext context, IDistributedCache cache, CancellationToken ct) =>
             {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
-                if (user == null)
-                {
-                    return Results.BadRequest("Usuário não encontrado.");
-                }
+                var cachedCode = await cache.GetStringAsync($"{request.Email}_verificationCode", ct);
+                var userName = await cache.GetStringAsync($"{request.Email}_name", ct);
+                var userEmail = await cache.GetStringAsync($"{request.Email}_email", ct);
+                var hashedPassword = await cache.GetStringAsync($"{request.Email}_hashedPassword", ct);
 
-                var verificationCode = await context.VerificationCodes.FirstOrDefaultAsync(vc => vc.UserId == user.Id && vc.Code == request.Code, ct);
-
-                if (verificationCode == null || verificationCode.Expiration < DateTime.UtcNow)
+                if (cachedCode == null || cachedCode != request.Code)
                 {
                     return Results.BadRequest("Código de verificação inválido ou expirado.");
                 }
 
-                user.ActiveUser();
+                if (userEmail == null || hashedPassword == null || userName == null)
+                {
+                    return Results.BadRequest("Usuário não encontrado ou dados expirados.");
+                }
+
+                var user = new User(userName, userEmail, hashedPassword, new string[] { "user" });
+
+                context.Users.Add(user);
                 await context.SaveChangesAsync(ct);
 
-                return Results.Ok("Verificação bem-sucedida.");
-            });
+                await cache.RemoveAsync(request.Email, ct);
+                await cache.RemoveAsync($"{request.Email}_verificationCode", ct);
+                await cache.RemoveAsync($"{request.Email}_name", ct);
+                await cache.RemoveAsync($"{request.Email}_email", ct);
+                await cache.RemoveAsync($"{request.Email}_hashedPassword", ct);
 
-            endpoint.MapPost("/resendVerification", async (string email, AppDbContext context, IEmailService emailService, CancellationToken ct) =>
-            {
-                var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
-                if (user == null)
-                {
-                    return Results.NotFound("Usuário não encontrado.");
-                }
-
-                if (user.Active)
-                {
-                    return Results.BadRequest("Usuário já está ativo.");
-                }
-
-                await VerificationCodeHelper.SendVerificationCodeAsync(user, context, emailService, ct);
-
-                return Results.Ok("Novo código de verificação enviado com sucesso.");
+                return Results.Ok("Verificação bem-sucedida. Usuário ativado.");
             });
         }
     }
