@@ -14,6 +14,7 @@ namespace api_desafio.tech.EndPoints
         {
             var endpoint = app.MapGroup("challenges").RequireAuthorization();
 
+            //todos
             endpoint.MapGet("/all", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -33,12 +34,14 @@ namespace api_desafio.tech.EndPoints
                     challenge.EndDate,
                     challenge.ChallengeDates,
                     challenge.Completed,
-                    challenge.UserId
+                    challenge.UserId,
+                    challenge.UserName
                 )).ToList();
 
                 return Results.Ok(challengeDtos);
             });
 
+            //todos
             endpoint.MapGet("/completed", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -58,12 +61,14 @@ namespace api_desafio.tech.EndPoints
                     challenge.EndDate,
                     challenge.ChallengeDates,
                     challenge.Completed,
-                    challenge.UserId
+                    challenge.UserId,
+                    challenge.UserName
                 )).ToList();
 
                 return Results.Ok(challengeDtos);
             });
 
+            //todos
             endpoint.MapGet("/notCompleted", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -83,23 +88,42 @@ namespace api_desafio.tech.EndPoints
                     challenge.EndDate,
                     challenge.ChallengeDates,
                     challenge.Completed,
-                    challenge.UserId
+                    challenge.UserId,
+                    challenge.UserName
                 )).ToList();
 
                 return Results.Ok(challengeDtos);
             });
 
+            //todos
+            endpoint.MapPost("/startChallenge", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            {
+
+            }
+            );
+
+
+            //criador e adm
             endpoint.MapPost("create", async (ClaimsPrincipal user, AddChallengeRequest request, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+                var userNameClaim = user.FindFirst(ClaimTypes.Name);
+
                 if (userIdClaim == null)
                 {
                     return Results.Unauthorized();
                 }
 
+                if (userNameClaim == null)
+                {
+                    return Results.Unauthorized();
+                }
+
                 var userId = Guid.Parse(userIdClaim.Value);
+                var userName = userNameClaim.Value;
                 var newChallenge = new Challenge(request.Title, request.Description, request.StartDate);
                 newChallenge.SetUserId(userId);
+                newChallenge.SetUserName(userName);
 
                 await context.Challenges.AddAsync(newChallenge, ct);
                 await context.SaveChangesAsync(ct);
@@ -112,12 +136,14 @@ namespace api_desafio.tech.EndPoints
                     newChallenge.EndDate,
                     newChallenge.ChallengeDates,
                     newChallenge.Completed,
-                    newChallenge.UserId
+                    newChallenge.UserId,
+                    newChallenge.UserName
                 );
 
                 return Results.Ok(challengeDto);
             });
 
+            //criador e adm
             endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateChallengeRequest request, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -150,13 +176,14 @@ namespace api_desafio.tech.EndPoints
                     challenge.EndDate,
                     challenge.ChallengeDates,
                     challenge.Completed,
-                    challenge.UserId
+                    challenge.UserId,
+                    challenge.UserName
                 );
 
                 return Results.Ok(challengeDto);
             });
 
-
+            //criador e adm
             endpoint.MapDelete("delete/{id:guid}", async (Guid id, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
