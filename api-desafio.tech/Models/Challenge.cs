@@ -9,14 +9,16 @@
         public DateTime EndDate { get; private set; }
         public List<DateTime> ChallengeDates { get; private set; }
         public bool Completed { get; private set; }
+        public string Author { get; private set; }
 
         public Guid? UserId { get; private set; }
         public string? UserName { get; private set; }
         public User? User { get; private set; }
 
-        public Challenge(string title, string description, DateTime startDate)
+        public Challenge(string author, string title, string description, DateTime startDate)
         {
             Id = Guid.NewGuid();
+            Author = author;
             Title = title;
             Description = description;
             StartDate = startDate.Date;
