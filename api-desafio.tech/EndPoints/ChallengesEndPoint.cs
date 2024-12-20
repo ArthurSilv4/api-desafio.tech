@@ -139,8 +139,7 @@ namespace api_desafio.tech.EndPoints
                 return Results.Ok(challengeDto);
             });
 
-
-            endpoint.MapPost("create", async (ClaimsPrincipal user, AddChallengeRequest request, AppDbContext context, CancellationToken ct) =>
+            endpoint.MapPost("create", async (ClaimsPrincipal user, CreateChallengeRequest request, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
                 var userNameClaim = user.FindFirst(ClaimTypes.Name);
