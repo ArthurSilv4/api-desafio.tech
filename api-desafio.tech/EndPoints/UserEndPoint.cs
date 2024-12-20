@@ -31,7 +31,20 @@ namespace api_desafio.tech.EndPoints
                     return Results.NotFound();
                 }
 
-                var userDto = new UserDto(userEntity.Id, userEntity.Name, userEntity.Description, userEntity.Email, userEntity.Roles, userEntity.Xp, userEntity.Level, userEntity.SocialMedia);
+                var userDto = new UserDto(
+                    userEntity.Id, 
+                    userEntity.Name, 
+                    userEntity.Description, 
+                    userEntity.Email, 
+                    userEntity.Roles, 
+                    userEntity.Xp, 
+                    userEntity.Level, 
+                    userEntity.Rank,
+                    userEntity.ChallengesCompleted,
+                    userEntity.MissionsCompleted,
+                    userEntity.SocialMedia,
+                    userEntity.ReceiveEmail
+                );
 
                 return Results.Ok(userDto);
             });

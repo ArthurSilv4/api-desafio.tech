@@ -35,7 +35,8 @@ namespace api_desafio.tech.EndPoints
                     challenge.ChallengeDates,
                     challenge.Completed,
                     challenge.UserId,
-                    challenge.UserName
+                    challenge.UserName,
+                    challenge.Status
                 )).ToList();
 
                 return Results.Ok(challengeDtos);
@@ -62,7 +63,8 @@ namespace api_desafio.tech.EndPoints
                     challenge.ChallengeDates,
                     challenge.Completed,
                     challenge.UserId,
-                    challenge.UserName
+                    challenge.UserName,
+                    challenge.Status
                 )).ToList();
 
                 return Results.Ok(challengeDtos);
@@ -89,7 +91,8 @@ namespace api_desafio.tech.EndPoints
                     challenge.ChallengeDates,
                     challenge.Completed,
                     challenge.UserId,
-                    challenge.UserName
+                    challenge.UserName,
+                    challenge.Status
                 )).ToList();
 
                 return Results.Ok(challengeDtos);
@@ -129,7 +132,8 @@ namespace api_desafio.tech.EndPoints
                     newChallenge.ChallengeDates,
                     newChallenge.Completed,
                     newChallenge.UserId,
-                    newChallenge.UserName
+                    newChallenge.UserName,
+                    newChallenge.Status
                 );
 
                 return Results.Ok(challengeDto);
@@ -173,7 +177,8 @@ namespace api_desafio.tech.EndPoints
                     newChallenge.ChallengeDates,
                     newChallenge.Completed,
                     newChallenge.UserId,
-                    newChallenge.UserName
+                    newChallenge.UserName,
+                    newChallenge.Status
                 );
 
                 return Results.Ok(challengeDto);
@@ -213,7 +218,8 @@ namespace api_desafio.tech.EndPoints
                     challenge.ChallengeDates,
                     challenge.Completed,
                     challenge.UserId,
-                    challenge.UserName
+                    challenge.UserName,
+                    challenge.Status
                 );
 
                 return Results.Ok(challengeDto);

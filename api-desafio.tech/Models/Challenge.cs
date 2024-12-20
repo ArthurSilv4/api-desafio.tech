@@ -10,6 +10,7 @@
         public List<DateTime> ChallengeDates { get; private set; }
         public bool Completed { get; private set; }
         public string Author { get; private set; }
+        public string Status => Completed ? "Completo" : "Em Andamento";
 
         public Guid? UserId { get; private set; }
         public string? UserName { get; private set; }

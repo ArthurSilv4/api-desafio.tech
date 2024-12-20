@@ -9,11 +9,15 @@
         public string Password { get; private set; }
         public string[] Roles { get; private set; }
         public bool Active { get; private set; }
-
+        public bool ReceiveEmail { get; private set; }
 
         public int Xp { get; private set; }
         public int Level { get; private set; }
-        public string[]? SocialMedia { get; private set; }
+        public int Rank { get; private set; }
+        public int ChallengesCompleted { get; private set; }
+        public int MissionsCompleted { get; private set; }
+
+        public List<string> SocialMedia { get; private set; } 
 
         public ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
 
@@ -27,8 +31,12 @@
             Roles = roles;
             Xp = 0;
             Level = 0;
-            SocialMedia = null;
             Active = true;
+            Rank = 0;
+            ChallengesCompleted = 0;
+            MissionsCompleted = 0;
+            SocialMedia = new List<string>();
+            ReceiveEmail = true;
         }
 
         public void UpdateEmail(string email)
