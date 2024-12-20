@@ -95,6 +95,46 @@ namespace api_desafio.tech.EndPoints
                 return Results.Ok(challengeDtos);
             });
 
+            endpoint.MapPost("create", async (ClaimsPrincipal user, CreateChallengeRequest request, AppDbContext context, CancellationToken ct) =>
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+                var userNameClaim = user.FindFirst(ClaimTypes.Name);
+
+                if (userIdClaim == null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                if (userNameClaim == null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var userId = Guid.Parse(userIdClaim.Value);
+                var userName = userNameClaim.Value;
+                var newChallenge = new Challenge(userName, request.Title, request.Description, request.StartDate);
+                newChallenge.SetUserId(userId);
+                newChallenge.SetUserName(userName);
+
+                await context.Challenges.AddAsync(newChallenge, ct);
+                await context.SaveChangesAsync(ct);
+
+                var challengeDto = new ChallengeDto(
+                    newChallenge.Id,
+                    newChallenge.Author,
+                    newChallenge.Title,
+                    newChallenge.Description,
+                    newChallenge.StartDate,
+                    newChallenge.EndDate,
+                    newChallenge.ChallengeDates,
+                    newChallenge.Completed,
+                    newChallenge.UserId,
+                    newChallenge.UserName
+                );
+
+                return Results.Ok(challengeDto);
+            });
+
             endpoint.MapPost("/cloneChallenge/{id:guid}", async (Guid id, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
@@ -119,46 +159,6 @@ namespace api_desafio.tech.EndPoints
 
                 newChallenge.SetUserId(userId);
                 newChallenge.SetUserName(challenge.UserName ?? string.Empty);
-
-                await context.Challenges.AddAsync(newChallenge, ct);
-                await context.SaveChangesAsync(ct);
-
-                var challengeDto = new ChallengeDto(
-                    newChallenge.Id,
-                    newChallenge.Author,
-                    newChallenge.Title,
-                    newChallenge.Description,
-                    newChallenge.StartDate,
-                    newChallenge.EndDate,
-                    newChallenge.ChallengeDates,
-                    newChallenge.Completed,
-                    newChallenge.UserId,
-                    newChallenge.UserName
-                );
-
-                return Results.Ok(challengeDto);
-            });
-
-            endpoint.MapPost("create", async (ClaimsPrincipal user, CreateChallengeRequest request, AppDbContext context, CancellationToken ct) =>
-            {
-                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
-                var userNameClaim = user.FindFirst(ClaimTypes.Name);
-
-                if (userIdClaim == null)
-                {
-                    return Results.Unauthorized();
-                }
-
-                if (userNameClaim == null)
-                {
-                    return Results.Unauthorized();
-                }
-
-                var userId = Guid.Parse(userIdClaim.Value);
-                var userName = userNameClaim.Value;
-                var newChallenge = new Challenge(userName, request.Title, request.Description, request.StartDate);
-                newChallenge.SetUserId(userId);
-                newChallenge.SetUserName(userName);
 
                 await context.Challenges.AddAsync(newChallenge, ct);
                 await context.SaveChangesAsync(ct);
