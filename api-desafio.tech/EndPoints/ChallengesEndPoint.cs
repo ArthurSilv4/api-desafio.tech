@@ -14,6 +14,27 @@ namespace api_desafio.tech.EndPoints
         {
             var endpoint = app.MapGroup("challenges").RequireAuthorization();
 
+            endpoint.MapGet("/", async (AppDbContext context, CancellationToken ct) =>
+            {
+                var challenges = await context.Challenges.ToListAsync(ct);
+
+                var challengeDtos = challenges.Select(challenge => new ChallengeDto(
+                    challenge.Id,
+                    challenge.Author,
+                    challenge.Title,
+                    challenge.Description,
+                    challenge.StartDate,
+                    challenge.EndDate,
+                    challenge.ChallengeDates,
+                    challenge.Completed,
+                    challenge.UserId,
+                    challenge.UserName,
+                    challenge.Status
+                )).ToList();
+
+                return Results.Ok(challengeDtos);
+            });
+
             endpoint.MapGet("/all", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
