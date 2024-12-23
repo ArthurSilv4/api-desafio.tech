@@ -35,6 +35,43 @@ namespace api_desafio.tech.EndPoints
                 return Results.Ok(challengeDtos);
             });
 
+            endpoint.MapGet("{id:guid}", async (Guid id, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var userId = Guid.Parse(userIdClaim.Value);
+                var challenge = await context.Challenges.FindAsync(id, ct);
+                if (challenge == null)
+                {
+                    return Results.NotFound();
+                }
+
+                if (challenge.UserId != userId)
+                {
+                    return Results.Forbid();
+                }
+
+                var challengeDto = new ChallengeDto(
+                    challenge.Id,
+                    challenge.Author,
+                    challenge.Title,
+                    challenge.Description,
+                    challenge.StartDate,
+                    challenge.EndDate,
+                    challenge.ChallengeDates,
+                    challenge.Completed,
+                    challenge.UserId,
+                    challenge.UserName,
+                    challenge.Status
+                );
+
+                return Results.Ok(challengeDto);
+            });
+
             endpoint.MapGet("/all", async (ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
             {
                 var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
