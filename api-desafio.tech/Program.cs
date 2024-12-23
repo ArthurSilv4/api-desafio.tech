@@ -106,5 +106,6 @@ app.UseAuthorization();
 app.AuthEndPoints();
 app.AddChallengesEndpoints();
 app.AddUserEndPoints();
+app.MissionsEndPoints();
 
 app.Run();

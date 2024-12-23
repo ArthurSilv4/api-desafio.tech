@@ -6,6 +6,7 @@ namespace api_desafio.tech.Data
 {
     public class AppDbContext :DbContext 
     {
+        public DbSet<Mission> Missions { get; set; }
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<User> Users { get; set; }
 

@@ -1,4 +1,6 @@
-﻿namespace api_desafio.tech.Models
+﻿using System.Text.Json.Serialization;
+
+namespace api_desafio.tech.Models
 {
     public class User
     {
@@ -17,9 +19,13 @@
         public int ChallengesCompleted { get; private set; }
         public int MissionsCompleted { get; private set; }
 
-        public List<string> SocialMedia { get; private set; } 
+        public List<string> SocialMedia { get; private set; }
 
+        [JsonIgnore]
         public ICollection<Challenge> Challenges { get; set; } = new List<Challenge>();
+
+        [JsonIgnore]
+        public ICollection<Mission> Missions { get; set; } = new List<Mission>();
 
         public User(string name, string email, string password, string[] roles)
         {
