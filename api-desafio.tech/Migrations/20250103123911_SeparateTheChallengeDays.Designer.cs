@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using api_desafio.tech.Data;
 
@@ -11,9 +12,11 @@ using api_desafio.tech.Data;
 namespace api_desafio.tech.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250103123911_SeparateTheChallengeDays")]
+    partial class SeparateTheChallengeDays
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,7 +72,7 @@ namespace api_desafio.tech.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ChallengeId")
+                    b.Property<Guid?>("ChallengeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Date")
@@ -82,7 +85,7 @@ namespace api_desafio.tech.Migrations
 
                     b.HasIndex("ChallengeId");
 
-                    b.ToTable("ChallengeDays");
+                    b.ToTable("ChallengeDay");
                 });
 
             modelBuilder.Entity("api_desafio.tech.Models.Mission", b =>
@@ -189,9 +192,7 @@ namespace api_desafio.tech.Migrations
                 {
                     b.HasOne("Challenge", "Challenge")
                         .WithMany("ChallengeDays")
-                        .HasForeignKey("ChallengeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ChallengeId");
 
                     b.Navigation("Challenge");
                 });

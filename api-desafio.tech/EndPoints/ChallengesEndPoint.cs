@@ -25,7 +25,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
@@ -51,7 +51,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
@@ -79,7 +79,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
@@ -114,7 +114,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
@@ -142,7 +142,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
@@ -170,7 +170,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
@@ -212,7 +212,7 @@ namespace api_desafio.tech.EndPoints
                     newChallenge.Description,
                     newChallenge.StartDate,
                     newChallenge.EndDate,
-                    newChallenge.ChallengeDates,
+                    newChallenge.ChallengeDays,
                     newChallenge.Completed,
                     newChallenge.UserId,
                     newChallenge.UserName,
@@ -259,7 +259,7 @@ namespace api_desafio.tech.EndPoints
                     newChallenge.Description,
                     newChallenge.StartDate,
                     newChallenge.EndDate,
-                    newChallenge.ChallengeDates,
+                    newChallenge.ChallengeDays,
                     newChallenge.Completed,
                     newChallenge.UserId,
                     newChallenge.UserName,
@@ -267,6 +267,32 @@ namespace api_desafio.tech.EndPoints
                 );
 
                 return Results.Ok(challengeDto);
+            });
+
+
+            endpoint.MapPut("edit/days/{id:guid}", async (Guid id, UpdateChallengeDayRequest request, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return Results.Unauthorized();
+                }
+                var userId = Guid.Parse(userIdClaim.Value);
+                var challenge = await context.ChallengeDays.FindAsync(id, ct);
+                if (challenge == null)
+                {
+                    return Results.NotFound();
+                }
+
+                challenge.UpdateDescription(request.Description);
+                await context.SaveChangesAsync(ct);
+
+                var challengeDayDto = new ChallengeDayDto(
+                    challenge.Date,
+                    challenge.Description ?? string.Empty
+                );
+
+                return Results.Ok(challengeDayDto);
             });
 
             endpoint.MapPut("edit/{id:guid}", async (Guid id, UpdateChallengeRequest request, ClaimsPrincipal user, AppDbContext context, CancellationToken ct) =>
@@ -300,7 +326,7 @@ namespace api_desafio.tech.EndPoints
                     challenge.Description,
                     challenge.StartDate,
                     challenge.EndDate,
-                    challenge.ChallengeDates,
+                    challenge.ChallengeDays,
                     challenge.Completed,
                     challenge.UserId,
                     challenge.UserName,
