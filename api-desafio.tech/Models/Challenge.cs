@@ -11,12 +11,13 @@
         public bool Completed { get; private set; }
         public string Author { get; private set; }
         public string Status => Completed ? "Completo" : "Em Andamento";
+        public bool IsClone { get; private set; }
 
         public Guid? UserId { get; private set; }
         public string? UserName { get; private set; }
         public User? User { get; private set; }
 
-        public Challenge(string author, string title, string description, DateTime startDate)
+        public Challenge(string author, string title, string description, DateTime startDate, bool isClone)
         {
             Id = Guid.NewGuid();
             Author = author;
@@ -26,6 +27,7 @@
             EndDate = startDate.Date.AddDays(4);
             ChallengeDates = Enumerable.Range(0, 5).Select(offset => startDate.Date.AddDays(offset)).ToList();
             Completed = false;
+            IsClone = isClone;
         }
 
         public void UpdateChallenge(string title, string description, DateTime startDate, bool completed)

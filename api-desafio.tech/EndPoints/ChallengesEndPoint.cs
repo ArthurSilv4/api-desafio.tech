@@ -16,7 +16,7 @@ namespace api_desafio.tech.EndPoints
 
             endpoint.MapGet("/", async (AppDbContext context, CancellationToken ct) =>
             {
-                var challenges = await context.Challenges.ToListAsync(ct);
+                var challenges = await context.Challenges.Where(challenge => !challenge.IsClone).ToListAsync(ct);
 
                 var challengeDtos = challenges.Select(challenge => new ChallengeDto(
                     challenge.Id,
@@ -197,7 +197,8 @@ namespace api_desafio.tech.EndPoints
 
                 var userId = Guid.Parse(userIdClaim.Value);
                 var userName = userNameClaim.Value;
-                var newChallenge = new Challenge(userName, request.Title, request.Description, request.StartDate);
+                var isclone = false;
+                var newChallenge = new Challenge(userName, request.Title, request.Description, request.StartDate, isclone);
                 newChallenge.SetUserId(userId);
                 newChallenge.SetUserName(userName);
 
@@ -236,11 +237,13 @@ namespace api_desafio.tech.EndPoints
                     return Results.NotFound();
                 }
 
+                var isClone = true;
                 var newChallenge = new Challenge(
                     challenge.UserName ?? string.Empty,
                     challenge.Title ?? string.Empty,
                     challenge.Description ?? string.Empty,
-                    DateTime.UtcNow
+                    DateTime.UtcNow,
+                    isClone
                 );
 
                 newChallenge.SetUserId(userId);
